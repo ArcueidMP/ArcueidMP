@@ -1,0 +1,76 @@
+{
+  "github_user": {
+    "public_repos": 3,
+    "stars": 14,
+    "languages": [
+      "TypeScript",
+      "Python"
+    ]
+  },
+  "repos": {
+    "ArcueidMP/AutoPet": {
+      "stars": 4,
+      "language": "TypeScript",
+      "pushed_at": "2026-05-28"
+    },
+    "ArcueidMP/DisposableResume": {
+      "stars": 7,
+      "language": "TypeScript",
+      "pushed_at": "2026-09-15"
+    },
+    "ArcueidMP/Domain-Specific-Paper-Harness": {
+      "stars": 3,
+      "language": "Python",
+      "pushed_at": "2026-09-18"
+    }
+  },
+  "contributions": {
+    "total": 201,
+    "commits": 94
+  },
+  "activity": [
+    {
+      "date": "2026-09-17",
+      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
+      "kind": "pull request · merged",
+      "text": "Harden arXiv ingestion and recover report publication",
+      "fallback": "Pull request #15 merged"
+    },
+    {
+      "date": "2026-09-15",
+      "repo": "ArcueidMP/DisposableResume",
+      "kind": "pull request · merged",
+      "text": "feat: render the live preview as the real PDF",
+      "fallback": "Pull request #21 merged"
+    },
+    {
+      "date": "2026-09-14",
+      "repo": "ArcueidMP/DisposableResume",
+      "kind": "pull request · merged",
+      "text": "fix: render Chinese text in Classic and Modern ATS PDF exports",
+      "fallback": "Pull request #20 merged"
+    },
+    {
+      "date": "2026-09-08",
+      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
+      "kind": "pull request · merged",
+      "text": "Fix topic isolation and resumable daily publication",
+      "fallback": "Pull request #14 merged"
+    },
+    {
+      "date": "2026-08-29",
+      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
+      "kind": "pull request · merged",
+      "text": "feat: support additional IAP accessors",
+      "fallback": "Pull request #13 merged"
+    },
+    {
+      "date": "2026-08-28",
+      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
+      "kind": "pull request · merged",
+      "text": "chore: prepare v0.1.0 open-source release",
+      "fallback": "Pull request #12 merged"
+    }
+  ],
+  "changed_at": "2026-09-18"
+}

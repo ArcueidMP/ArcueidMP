@@ -1,0 +1,70 @@
+# Content for the profile README assets. Edit this file, then run
+#   python scripts/build.py
+# (or push: the GitHub Action rebuilds assets/*.svg automatically).
+#
+# Deliberately GitHub-centric: handle, interests, repositories and activity.
+# No name, institution, awards or contact details.
+
+[identity]
+name = "ArcueidMP"
+eyebrow = "SOFTWARE ENGINEERING · RESEARCH PORTFOLIO"
+tagline = ["Undergraduate exploring AI agents,", "world models, and embodied intelligence"]
+
+# The card on the right of the hero. Its numbers are filled from the GitHub API.
+[dossier]
+eyebrow = "PUBLIC ACTIVITY"
+title = "GitHub at a glance"
+detail = "public data · refreshed daily"
+
+[links]
+github = "ArcueidMP"
+
+# ---------------------------------------------------------------------------
+# 01 / RESEARCH
+[research]
+interests = ["AI Agents", "World Models", "Embodied Intelligence"]
+related = ["Large Language Models", "Computer Vision"]
+
+# ---------------------------------------------------------------------------
+# 02 / SELECTED WORK
+# Stars, primary language and last push date come from the GitHub API.
+[[projects]]
+repo = "ArcueidMP/DisposableResume"
+title = "DisposableResume"
+description = "A zero-retention, browser-only résumé builder with live preview and client-side PDF export."
+status = "ACTIVE"
+
+[[projects]]
+repo = "ArcueidMP/Domain-Specific-Paper-Harness"
+title = "Domain-Specific Paper Harness"
+description = "Self-hosted research intelligence: arXiv discovery, grounded full-text analysis and a provenance-aware graph."
+status = "ACTIVE"
+
+[[projects]]
+repo = "ArcueidMP/AutoPet"
+title = "AutoPet"
+description = "Windows-first desktop pet: one transparent PNG in, an animated Electron pet out, processed locally."
+status = "PROTOTYPE"
+
+# ---------------------------------------------------------------------------
+# Section labels (number / eyebrow / heading). 03 is the recent-activity
+# ledger and 04 the 3D contribution map; both are filled automatically.
+[[sections]]
+id = "research"
+eyebrow = "01 / RESEARCH"
+heading = "Current interests"
+
+[[sections]]
+id = "work"
+eyebrow = "02 / SELECTED WORK"
+heading = "Featured projects"
+
+[[sections]]
+id = "log"
+eyebrow = "03 / LOG"
+heading = "Recent public activity"
+
+[[sections]]
+id = "activity"
+eyebrow = "04 / ACTIVITY"
+heading = "A year of contributions"
