@@ -11,7 +11,7 @@
     "ArcueidMP/ArcueidMP": {
       "stars": 0,
       "language": "Python",
-      "pushed_at": "2026-09-21"
+      "pushed_at": "2026-09-22"
     },
     "ArcueidMP/AutoPet": {
       "stars": 4,
@@ -56,13 +56,6 @@
       "fallback": "Commit 7426bc9"
     },
     {
-      "date": "2026-09-18",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "commit",
-      "text": "first commit",
-      "fallback": "Commit f1248a8"
-    },
-    {
       "date": "2026-09-17",
       "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
       "kind": "pull request · merged",
@@ -75,7 +68,14 @@
       "kind": "pull request · merged",
       "text": "feat: render the live preview as the real PDF",
       "fallback": "Pull request #21 merged"
+    },
+    {
+      "date": "2026-09-14",
+      "repo": "ArcueidMP/DisposableResume",
+      "kind": "pull request · merged",
+      "text": "fix: render Chinese text in Classic and Modern ATS PDF exports",
+      "fallback": "Pull request #20 merged"
     }
   ],
-  "changed_at": "2026-09-22"
+  "changed_at": "2026-09-23"
 }
