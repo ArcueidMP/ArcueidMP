@@ -20,6 +20,7 @@ I build software around AI agents and research tooling: a self-hosted paper-disc
 <img alt="02 / Selected work — Featured projects" src="assets/label-work-light.svg" width="100%">
 </picture>
 
+<div>
 <a href="https://github.com/ArcueidMP/DisposableResume"><picture>
 <source media="(prefers-color-scheme: dark)" srcset="assets/project-1-dark.svg">
 <img alt="DisposableResume — a zero-retention, browser-only résumé builder" src="assets/project-1-light.svg" width="100%">
@@ -32,6 +33,7 @@ I build software around AI agents and research tooling: a self-hosted paper-disc
 <source media="(prefers-color-scheme: dark)" srcset="assets/project-3-dark.svg">
 <img alt="AutoPet — Windows-first desktop pet generated from one transparent PNG" src="assets/project-3-light.svg" width="100%">
 </picture></a>
+</div>
 
 <picture>
 <source media="(prefers-color-scheme: dark)" srcset="assets/label-log-dark.svg">
