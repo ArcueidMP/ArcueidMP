@@ -11,7 +11,7 @@
     "ArcueidMP/ArcueidMP": {
       "stars": 0,
       "language": "Python",
-      "pushed_at": "2026-09-24"
+      "pushed_at": "2026-09-26"
     },
     "ArcueidMP/AutoPet": {
       "stars": 4,
@@ -27,13 +27,25 @@
       "stars": 3,
       "language": "Python",
       "pushed_at": "2026-09-19"
+    },
+    "ArcueidMP/TencentDB-Agent-Memory": {
+      "stars": 0,
+      "language": null,
+      "pushed_at": "2026-09-26"
     }
   },
   "contributions": {
-    "total": 205,
-    "commits": 98
+    "total": 208,
+    "commits": 99
   },
   "activity": [
+    {
+      "date": "2026-09-26",
+      "repo": "ArcueidMP/ArcueidMP",
+      "kind": "commit",
+      "text": "fix: keep project links in one HTML block so dark variants load",
+      "fallback": "Commit 16a26ef"
+    },
     {
       "date": "2026-09-19",
       "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
@@ -68,14 +80,7 @@
       "kind": "pull request · merged",
       "text": "fix: render Chinese text in Classic and Modern ATS PDF exports",
       "fallback": "Pull request #20 merged"
-    },
-    {
-      "date": "2026-09-08",
-      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
-      "kind": "pull request · merged",
-      "text": "Fix topic isolation and resumable daily publication",
-      "fallback": "Pull request #14 merged"
     }
   ],
-  "changed_at": "2026-09-25"
+  "changed_at": "2026-09-26"
 }
