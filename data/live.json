@@ -11,12 +11,17 @@
     "ArcueidMP/ArcueidMP": {
       "stars": 0,
       "language": "Python",
-      "pushed_at": "2026-09-28"
+      "pushed_at": "2026-09-29"
     },
     "ArcueidMP/AutoPet": {
       "stars": 4,
       "language": "TypeScript",
       "pushed_at": "2026-05-28"
+    },
+    "ArcueidMP/BrowserSkill": {
+      "stars": 0,
+      "language": null,
+      "pushed_at": "2026-09-30"
     },
     "ArcueidMP/DisposableResume": {
       "stars": 7,
@@ -31,14 +36,21 @@
     "ArcueidMP/TencentDB-Agent-Memory": {
       "stars": 0,
       "language": null,
-      "pushed_at": "2026-09-26"
+      "pushed_at": "2026-09-29"
     }
   },
   "contributions": {
-    "total": 209,
+    "total": 212,
     "commits": 99
   },
   "activity": [
+    {
+      "date": "2026-09-30",
+      "repo": "Tencent/BrowserSkill",
+      "kind": "pull request · merged",
+      "text": "fix(input): restore a dropped background lease before hidden input",
+      "fallback": "Pull request #374 merged"
+    },
     {
       "date": "2026-09-26",
       "repo": "ArcueidMP/ArcueidMP",
@@ -73,14 +85,7 @@
       "kind": "pull request · merged",
       "text": "feat: render the live preview as the real PDF",
       "fallback": "Pull request #21 merged"
-    },
-    {
-      "date": "2026-09-14",
-      "repo": "ArcueidMP/DisposableResume",
-      "kind": "pull request · merged",
-      "text": "fix: render Chinese text in Classic and Modern ATS PDF exports",
-      "fallback": "Pull request #20 merged"
     }
   ],
-  "changed_at": "2026-09-29"
+  "changed_at": "2026-09-30"
 }
