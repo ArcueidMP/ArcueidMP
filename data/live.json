@@ -11,7 +11,7 @@
     "ArcueidMP/ArcueidMP": {
       "stars": 1,
       "language": "Python",
-      "pushed_at": "2026-10-01"
+      "pushed_at": "2026-10-02"
     },
     "ArcueidMP/AutoPet": {
       "stars": 4,
@@ -45,7 +45,7 @@
     }
   },
   "contributions": {
-    "total": 216,
+    "total": 217,
     "commits": 100
   },
   "activity": [
@@ -62,13 +62,6 @@
       "kind": "pull request · merged",
       "text": "Fix graph exploration and trend label readability",
       "fallback": "Pull request #16 merged"
-    },
-    {
-      "date": "2026-09-19",
-      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
-      "kind": "commit",
-      "text": "fix: improve graph exploration and trend label readability (#16)",
-      "fallback": "Commit 6b075ae"
     },
     {
       "date": "2026-09-17",
@@ -90,7 +83,14 @@
       "kind": "pull request · merged",
       "text": "fix: render Chinese text in Classic and Modern ATS PDF exports",
       "fallback": "Pull request #20 merged"
+    },
+    {
+      "date": "2026-09-08",
+      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
+      "kind": "pull request · merged",
+      "text": "Fix topic isolation and resumable daily publication",
+      "fallback": "Pull request #14 merged"
     }
   ],
-  "changed_at": "2026-10-02"
+  "changed_at": "2026-10-03"
 }
