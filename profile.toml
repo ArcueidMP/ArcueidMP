@@ -29,7 +29,12 @@ github = "ArcueidMP"
 # ---------------------------------------------------------------------------
 # 01 / RESEARCH
 [research]
-interests = ["AI Agents", "World Models", "Embodied Intelligence"]
+# Each interest is a title, or { title, note } to add a smaller line below it.
+interests = [
+  { title = "AI Agents", note = "Development & RL" },
+  "World Models & Embodied AI",
+  "AI Infra",
+]
 related = ["Large Language Models", "Computer Vision"]
 
 # ---------------------------------------------------------------------------

@@ -12,7 +12,7 @@ I build software around AI agents and research tooling: a self-hosted paper-disc
 
 <picture>
 <source media="(prefers-color-scheme: dark)" srcset="assets/interests-dark.svg">
-<img alt="AI agents, world models, embodied intelligence; related: large language models, computer vision" src="assets/interests-light.svg" width="100%">
+<img alt="AI agents (development and RL), world models and embodied AI, AI infra; related: large language models, computer vision" src="assets/interests-light.svg" width="100%">
 </picture>
 
 <picture>
