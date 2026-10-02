@@ -45,8 +45,8 @@
     }
   },
   "contributions": {
-    "total": 217,
-    "commits": 100
+    "total": 224,
+    "commits": 106
   },
   "activity": [
     {
@@ -57,44 +57,44 @@
       "fallback": "Pull request #1 merged"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "commit",
-      "text": "feat: bring back the 3D contribution map below the night sky",
-      "fallback": "Commit d962760"
+      "date": "2026-09-30",
+      "repo": "Tencent/BrowserSkill",
+      "kind": "pull request · merged",
+      "text": "fix(input): restore a dropped background lease before hidden input",
+      "fallback": "Pull request #374 merged"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "commit",
-      "text": "feat: glass-shard section marks and a live dot on active projects",
-      "fallback": "Commit e809978"
+      "date": "2026-09-19",
+      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
+      "kind": "pull request · merged",
+      "text": "Fix graph exploration and trend label readability",
+      "fallback": "Pull request #16 merged"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "commit",
-      "text": "feat: vermilion seal and Mincho epigraph in the hero",
-      "fallback": "Commit 33ff6f6"
+      "date": "2026-09-17",
+      "repo": "ArcueidMP/Domain-Specific-Paper-Harness",
+      "kind": "pull request · merged",
+      "text": "Harden arXiv ingestion and recover report publication",
+      "fallback": "Pull request #15 merged"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "commit",
-      "text": "feat: night-sky contribution calendar in place of the 3D map",
-      "fallback": "Commit 59a320b"
+      "date": "2026-09-15",
+      "repo": "ArcueidMP/DisposableResume",
+      "kind": "pull request · merged",
+      "text": "feat: render the live preview as the real PDF",
+      "fallback": "Pull request #21 merged"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "commit",
-      "text": "feat: glass moon hero shaded to the real moon phase",
-      "fallback": "Commit 5545c6b"
+      "date": "2026-09-14",
+      "repo": "ArcueidMP/DisposableResume",
+      "kind": "pull request · merged",
+      "text": "fix: render Chinese text in Classic and Modern ATS PDF exports",
+      "fallback": "Pull request #20 merged"
     }
   ],
   "calendar": {
     "start": "2025-09-28",
-    "counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10, 3, 0, 7, 5, 3, 15, 6, 3, 0, 9, 0, 0, 5, 15, 0, 0, 3, 0, 10, 6, 0, 0, 1, 2, 6, 0, 3, 0, 0, 0, 7, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 0, 0, 0, 4, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 2, 4, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 3, 0, 0, 0, 3, 3, 0, 2, 3, 2, 0, 0, 0, 0, 0, 0, 4, 0, 0, 1, 5, 1, 4]
+    "counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10, 3, 0, 7, 5, 3, 15, 6, 3, 0, 9, 0, 0, 5, 15, 0, 0, 3, 0, 10, 6, 0, 0, 1, 2, 6, 0, 3, 0, 0, 0, 7, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 4, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 2, 4, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 3, 0, 0, 0, 3, 3, 0, 2, 3, 2, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 6, 1, 4, 7]
   },
-  "changed_at": "2026-10-02"
+  "changed_at": "2026-10-03"
 }

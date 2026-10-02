@@ -299,7 +299,10 @@ query($login: String!, $search: String!) {
       nodes {
         nameWithOwner
         defaultBranchRef { target { ... on Commit {
-          history(first: 6) { nodes { oid messageHeadline committedDate author { user { login } } } }
+          history(first: 6) { nodes {
+            oid messageHeadline committedDate author { user { login } }
+            associatedPullRequests(first: 3) { nodes { number repository { nameWithOwner } } }
+          } }
         } } }
       }
     }
@@ -338,12 +341,14 @@ def recent_activity(login: str, data: dict) -> list[dict]:
             headline = commit["messageHeadline"].strip()
             if author.get("login") != login or MERGE_COMMIT.match(headline):
                 continue
-            # A squash merge's headline often differs from its PR title ("fix: improve x (#16)"
-            # vs "Fix x"), so match the "(#N)" suffix against the merged PRs first.
-            suffix = PR_SUFFIX.search(headline)
-            if suffix and (repo["nameWithOwner"], int(suffix.group(1))) in seen_prs:
-                continue  # the merged pull request already tells this story
-            if PR_SUFFIX.sub("", headline).lower() in seen_titles:
+            # Skip commits a listed merged PR already tells the story of. GitHub links every
+            # commit that arrived through a PR, whether squashed, rebased or merged; the
+            # "(#N)" suffix and the title are fallbacks for commits it has not linked.
+            prs = {(pr["repository"]["nameWithOwner"], pr["number"])
+                   for pr in (commit.get("associatedPullRequests") or {}).get("nodes", []) if pr}
+            if suffix := PR_SUFFIX.search(headline):
+                prs.add((repo["nameWithOwner"], int(suffix.group(1))))
+            if prs & seen_prs or PR_SUFFIX.sub("", headline).lower() in seen_titles:
                 continue
             entries.append({"date": commit["committedDate"][:10], "repo": repo["nameWithOwner"],
                             "kind": "commit", "text": headline, "fallback": f"Commit {commit['oid'][:7]}"})
