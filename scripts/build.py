@@ -283,17 +283,19 @@ query($login: String!, $search: String!) {
 """
 
 MERGE_COMMIT = re.compile(r"^Merge (pull request|branch|remote-tracking branch) ")
-PR_SUFFIX = re.compile(r"\s*\(#\d+\)$")
+PR_SUFFIX = re.compile(r"\s*\(#(\d+)\)$")
 
 
 def recent_activity(login: str, data: dict) -> list[dict]:
     """Merge public commits and merged pull requests into one dated list, newest first."""
     entries: list[dict] = []
     seen_titles: set[str] = set()
+    seen_prs: set[tuple[str, int]] = set()
     for pr in data["search"]["nodes"]:
         if not pr or pr["repository"]["isPrivate"] or not pr.get("mergedAt"):
             continue
         seen_titles.add(pr["title"].strip().lower())
+        seen_prs.add((pr["repository"]["nameWithOwner"], pr["number"]))
         entries.append({"date": pr["mergedAt"][:10], "repo": pr["repository"]["nameWithOwner"],
                         "kind": "pull request · merged", "text": pr["title"].strip(),
                         "fallback": f"Pull request #{pr['number']} merged"})
@@ -306,8 +308,13 @@ def recent_activity(login: str, data: dict) -> list[dict]:
             headline = commit["messageHeadline"].strip()
             if author.get("login") != login or MERGE_COMMIT.match(headline):
                 continue
-            if PR_SUFFIX.sub("", headline).lower() in seen_titles:
+            # A squash merge's headline often differs from its PR title ("fix: improve x (#16)"
+            # vs "Fix x"), so match the "(#N)" suffix against the merged PRs first.
+            suffix = PR_SUFFIX.search(headline)
+            if suffix and (repo["nameWithOwner"], int(suffix.group(1))) in seen_prs:
                 continue  # the merged pull request already tells this story
+            if PR_SUFFIX.sub("", headline).lower() in seen_titles:
+                continue
             entries.append({"date": commit["committedDate"][:10], "repo": repo["nameWithOwner"],
                             "kind": "commit", "text": headline, "fallback": f"Commit {commit['oid'][:7]}"})
     entries.sort(key=lambda e: e["date"], reverse=True)
@@ -452,7 +459,9 @@ def build_interests(f: Fonts, t: dict, cfg: dict) -> str:
     return c.render(H, "Research interests: " + ", ".join(items))
 
 
-def build_project(f: Fonts, t: dict, index: int, project: dict, live: dict) -> str:
+def build_project(f: Fonts, t: dict, index: int, project: dict, live: dict, last: bool) -> str:
+    """One project row. Rows share rules: each draws only its top rule, and the last
+    one also closes the list, so stacked cards never show a doubled line."""
     c = Canvas(f, t)
     LINE = 19
     repo = (live.get("repos") or {}).get(project["repo"], {})
@@ -488,7 +497,8 @@ def build_project(f: Fonts, t: dict, index: int, project: dict, live: dict) -> s
 
     for j, line in enumerate(lines):
         c.add(c.text(f.sans, line, 90, 66 + j * LINE, 13.5, t["soft"]))
-    c.add(c.hrule(H - 1, t["rule"]))
+    if last:
+        c.add(c.hrule(H - 1, t["rule"]))
     return c.render(H, f"{project['title']} — {project['description']}")
 
 
@@ -537,8 +547,10 @@ def main() -> None:
             files[f"log-{theme_name}.svg"] = log
         for section in cfg["sections"]:
             files[f"label-{section['id']}-{theme_name}.svg"] = build_label(fonts, t, section)
-        for i, project in enumerate(cfg["projects"], start=1):
-            files[f"project-{i}-{theme_name}.svg"] = build_project(fonts, t, i, project, live)
+        projects = cfg["projects"]
+        for i, project in enumerate(projects, start=1):
+            files[f"project-{i}-{theme_name}.svg"] = build_project(fonts, t, i, project, live,
+                                                                    last=i == len(projects))
         for name, content in files.items():
             expected.add(name)
             path = ASSET_DIR / name
