@@ -12,11 +12,11 @@ The hero carries a faceted glass moon, shaded to the real phase of the moon on
 the (UTC) build day and turning vermilion on the night of a full moon. Its
 perpetual motion is CSS inside the SVG, so prefers-reduced-motion stills it.
 
-Live numbers (repository stars, languages, contributions, recent public
-commits and merged pull requests) come from the GitHub API at build time and
-are cached in data/live.json so an API outage never produces an empty card.
-Only public data is ever requested. The 3D contribution map is not built
-here; it comes from yoshi389111/github-profile-3d-contrib in the same workflow.
+Live numbers (repository stars, languages, contributions, the year's daily
+contribution counts, recent public commits and merged pull requests) come
+from the GitHub API at build time and are cached in data/live.json so an API
+outage never produces an empty card. Only public data is ever requested. The
+daily counts are drawn as a night sky, one star per day.
 
 Usage:  python scripts/build.py            # edit profile.toml first
 """
@@ -285,7 +285,10 @@ query($login: String!, $search: String!) {
   user(login: $login) {
     contributionsCollection {
       totalCommitContributions
-      contributionCalendar { totalContributions }
+      contributionCalendar {
+        totalContributions
+        weeks { contributionDays { date contributionCount } }
+      }
     }
     repositories(first: 20, privacy: PUBLIC, ownerAffiliations: OWNER, isFork: false,
                  orderBy: {field: PUSHED_AT, direction: DESC}) {
@@ -346,7 +349,7 @@ def recent_activity(login: str, data: dict) -> list[dict]:
 
 def fetch_live(cfg: dict) -> dict:
     prev = json.loads(DATA_FILE.read_text(encoding="utf-8")) if DATA_FILE.exists() else {}
-    live = {k: prev.get(k) for k in ("github_user", "repos", "contributions", "activity")}
+    live = {k: prev.get(k) for k in ("github_user", "repos", "contributions", "activity", "calendar")}
     login = cfg["links"]["github"]
     headers = {"Accept": "application/vnd.github+json"}
     token = github_token()
@@ -384,12 +387,15 @@ def fetch_live(cfg: dict) -> dict:
                 "commits": coll["totalCommitContributions"],
             }
             live["activity"] = recent_activity(login, data)
+            days = [d for w in coll["contributionCalendar"]["weeks"] for d in w["contributionDays"]]
+            live["calendar"] = {"start": days[0]["date"], "counts": [d["contributionCount"] for d in days]}
         except Exception as exc:  # noqa: BLE001
             print(f"warning: activity unavailable ({exc}); using cached values", file=sys.stderr)
     else:
         print("note: no GitHub token; contributions and activity use cached values", file=sys.stderr)
 
-    # Only move the "synced" date when a number actually changed.
+    # Only move the "synced" date when a number actually changed. The calendar is left
+    # out: its window slides every day, and a new contribution moves the total anyway.
     def core(d: dict) -> str:
         return json.dumps({k: d.get(k) for k in ("github_user", "repos", "contributions", "activity")},
                           sort_keys=True)
@@ -397,7 +403,11 @@ def fetch_live(cfg: dict) -> dict:
     today = dt.date.today().isoformat()
     live["changed_at"] = prev.get("changed_at", today) if core(live) == core(prev) else today
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
-    DATA_FILE.write_text(json.dumps(live, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    text = json.dumps(live, indent=2, ensure_ascii=False)
+    # keep arrays of plain numbers (the year of daily counts) on one line rather than 371
+    text = re.sub(r"\[\s*(\d+(?:,\s*\d+)*)\s*\]",
+                  lambda m: "[" + ", ".join(n.strip() for n in m.group(1).split(",")) + "]", text)
+    DATA_FILE.write_text(text + "\n", encoding="utf-8")
     return live
 
 
@@ -638,6 +648,18 @@ def draw_moon(c: Canvas, cx: float, cy: float, phase: dict) -> str:
 # --------------------------------------------------------------------------- assets
 
 
+def sky_backdrop(c: Canvas, height: float) -> None:
+    """The panel shared by the hero and the calendar: a night gradient, or warm paper with a little grain."""
+    t = c.t
+    c.define(f'<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{t["bg"]}"/>'
+             f'<stop offset="1" stop-color="{t["bg2"]}"/></linearGradient>')
+    c.add(f'<rect width="{W}" height="{num(height)}" fill="url(#sky)"/>')
+    if not t["night"]:
+        c.define('<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" '
+                 'stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.35 0 0 0 0 0.3 0 0 0 0 0.22 0 0 0 0.09 0"/></filter>')
+        c.add(f'<rect width="{W}" height="{num(height)}" filter="url(#grain)"/>')
+
+
 def build_hero(f: Fonts, t: dict, cfg: dict, live: dict, phase: dict) -> str:
     c = Canvas(f, t)
     H = 300
@@ -645,11 +667,8 @@ def build_hero(f: Fonts, t: dict, cfg: dict, live: dict, phase: dict) -> str:
     mx, my = 548, 150                  # moon centre, between the tagline and the card
     cx, cy, cw, ch = 606, 40, 234, 222  # the card, laid over the moon's right limb
 
-    # Sky: a night gradient with stars, or warm paper with a little grain.
-    c.define(f'<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{t["bg"]}"/>'
-             f'<stop offset="1" stop-color="{t["bg2"]}"/></linearGradient>')
-    c.add(f'<rect width="{W}" height="{H}" fill="url(#sky)"/>')
-    if t["night"]:
+    sky_backdrop(c, H)
+    if t["night"]:  # a few faint stars, kept clear of the moon and the card
         rnd = random.Random(3)
         stars = []
         for i in range(70):
@@ -661,10 +680,6 @@ def build_hero(f: Fonts, t: dict, cfg: dict, live: dict, phase: dict) -> str:
             tw = f' class="tw" style="animation-duration:{dur:.1f}s;animation-delay:{delay:.1f}s"' if i % 9 == 0 else ""
             stars.append(f'<circle{tw} cx="{num(x, 1)}" cy="{num(y, 1)}" r="{size}" fill="#dfe8ff" opacity="{alpha:.2f}"/>')
         c.add("".join(stars))
-    else:
-        c.define('<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" '
-                 'stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.35 0 0 0 0 0.3 0 0 0 0 0.22 0 0 0 0.09 0"/></filter>')
-        c.add(f'<rect width="{W}" height="{H}" filter="url(#grain)"/>')
     c.add(c.fade(draw_moon(c, mx, my, phase), 0.15))
 
     # Left column: accent rule, eyebrow, handle, tagline.
@@ -804,6 +819,100 @@ def build_log(f: Fonts, t: dict, cfg: dict, live: dict) -> str | None:
     return c.render(H, "Recent public activity: " + "; ".join(f"{e['repo']}: {e['text']}" for e in entries))
 
 
+SKY_CSS = (
+    "@media (prefers-reduced-motion:no-preference){"
+    ".col{animation:appear .7s ease-out both}"
+    ".links{animation:appear 1.2s ease-out 1.1s both}"
+    ".tw{animation:twinkle 4.5s ease-in-out infinite}"
+    "@keyframes appear{from{opacity:0}}"
+    "@keyframes twinkle{50%{opacity:.35}}}"
+)
+
+
+def build_sky(f: Fonts, t: dict, live: dict) -> str | None:
+    """A year of contributions as a night sky: one star per day, brighter on busier days,
+    with days close together joined into constellations and today ringed in vermilion."""
+    cal = live.get("calendar")
+    if not cal or not cal["counts"]:
+        return None
+    c = Canvas(f, t)
+    c.style(SKY_CSS)
+    H = 228
+    counts = cal["counts"]
+    start = dt.date.fromisoformat(cal["start"])
+    first_row = (start.weekday() + 1) % 7  # GitHub's weeks run Sunday to Saturday
+    n_weeks = (first_row + len(counts) + 6) // 7
+    x0, y0, dy = PAD + 8, 40, 16
+    dx = min(15.0, (RIGHT - 8 - x0) / max(n_weeks - 1, 1))
+    peak = max(counts) or 1
+    night = t["night"]
+    sky_backdrop(c, H)
+
+    days = []
+    for i, n in enumerate(counts):
+        k = first_row + i
+        days.append((start + dt.timedelta(days=i), k // 7, x0 + (k // 7) * dx, y0 + (k % 7) * dy, n))
+    active = [d for d in days if d[4]]
+
+    links = "".join(f'<line x1="{num(a[2], 1)}" y1="{num(a[3], 1)}" x2="{num(b[2], 1)}" y2="{num(b[3], 1)}"/>'
+                    for a, b in zip(active, active[1:]) if (b[0] - a[0]).days <= 3)
+    c.add(f'<g class="links" stroke="{t["label"]}" stroke-opacity="{0.22 if night else 0.3}" stroke-width="0.7">{links}</g>')
+
+    if night:
+        c.define(f'<radialGradient id="halo"><stop offset="0" stop-color="#e6eeff" stop-opacity="0.75"/>'
+                 f'<stop offset="0.35" stop-color="{t["accent"]}" stop-opacity="0.28"/>'
+                 f'<stop offset="1" stop-color="{t["accent"]}" stop-opacity="0"/></radialGradient>')
+    bright = sorted(counts, reverse=True)[min(4, len(counts) - 1)]  # the five busiest days twinkle
+    columns: dict[int, list[str]] = {}
+    for day, col, x, y, n in days:
+        marks = columns.setdefault(col, [])
+        if not n:
+            marks.append(f'<circle cx="{num(x, 1)}" cy="{num(y, 1)}" r="0.9" fill="{t["rule"] if night else "#ddd6c9"}"/>')
+            continue
+        v = n / peak
+        r = 1.4 + 4.2 * math.sqrt(v)
+        if night:
+            tw = f' class="tw" style="animation-delay:{(col % 5) * 0.7:.1f}s"' if n >= bright else ""
+            marks.append(f'<circle{tw} cx="{num(x, 1)}" cy="{num(y, 1)}" r="{num(r * 2.6, 1)}" fill="url(#halo)"/>'
+                         f'<circle cx="{num(x, 1)}" cy="{num(y, 1)}" r="{num(r * 0.55, 1)}" fill="{ramp(["#8fb2ee", "#ffffff"], v + 0.3)}"/>')
+            spark = "#eaf1ff"
+        else:
+            marks.append(f'<circle cx="{num(x, 1)}" cy="{num(y, 1)}" r="{num(r * 0.72, 1)}" fill="{t["accent"]}" '
+                         f'fill-opacity="{0.35 + 0.65 * v:.2f}"/>')
+            spark = t["accent"]
+        if v >= 0.4:  # a four-point glint on the brightest stars
+            arm = r * 1.9
+            marks.append(f'<path d="M{num(x - arm, 1)},{num(y, 1)}H{num(x + arm, 1)}M{num(x, 1)},{num(y - arm, 1)}V{num(y + arm, 1)}" '
+                         f'stroke="{spark}" stroke-opacity="0.55" stroke-width="0.7"/>')
+    # columns fade in from left to right, like the sky darkening
+    c.add("".join(f'<g class="col" style="animation-delay:{col * 0.02:.2f}s">{"".join(m)}</g>'
+                  for col, m in sorted(columns.items())))
+    _, _, tx, ty, _ = days[-1]
+    c.add(f'<circle cx="{num(tx, 1)}" cy="{num(ty, 1)}" r="5" fill="none" stroke="{t["red"]}" stroke-width="1.2"/>')
+
+    # each month is labelled above the week of its first Sunday, so a few stray days of a
+    # month at the start of the window get no label to crowd the next one
+    for col in range(n_weeks):
+        sunday = col * 7 - first_row
+        if 0 <= sunday < len(counts) and (day := start + dt.timedelta(days=sunday)).day <= 7:
+            c.add(c.text(f.sans_medium, day.strftime("%b").upper(), x0 + col * dx - 3, y0 + 6 * dy + 26, 10,
+                         t["muted"], tracking=0.08))
+
+    total = (live.get("contributions") or {}).get("total", sum(counts))
+    c.add(c.hrule(178, t["rule2"] if night else t["rule"]))
+    x = PAD
+    c.add(c.text(f.display, f"{total:,}", x, 208, 22, t["label"], features=TABULAR))
+    x += f.display.width(f"{total:,}", 22, features=TABULAR) + 6
+    c.add(c.text(f.serif, "contributions", x, 208, 17, t["text"]))
+    x += f.serif.width("contributions", 17) + 18
+    c.add(c.text(f.sans, f"{len(active)} active days · brightest {peak}", x, 207, 12.5, t["muted"], features=TABULAR))
+    tw_ = f.sans.width("today", 12)
+    c.add(c.text(f.sans, "today", RIGHT, 207, 12, t["muted"], anchor="end"))
+    c.add(f'<circle cx="{num(RIGHT - tw_ - 9, 1)}" cy="203" r="4" fill="none" stroke="{t["red"]}" stroke-width="1.2"/>')
+    c.add(c.text(f.sans, "one star per day ·", RIGHT - tw_ - 19, 207, 12, t["muted"], anchor="end"))
+    return c.render(H, f"Contributions over the past year: {total:,} on {len(active)} days, drawn as a night sky")
+
+
 # --------------------------------------------------------------------------- main
 
 
@@ -824,6 +933,9 @@ def main() -> None:
         log = build_log(fonts, t, cfg, live)
         if log:
             files[f"log-{theme_name}.svg"] = log
+        sky = build_sky(fonts, t, live)
+        if sky:
+            files[f"sky-{theme_name}.svg"] = sky
         for section in cfg["sections"]:
             files[f"label-{section['id']}-{theme_name}.svg"] = build_label(fonts, t, section)
         projects = cfg["projects"]
@@ -836,9 +948,9 @@ def main() -> None:
             if not path.exists() or path.read_text(encoding="utf-8") != content:
                 path.write_text(content, encoding="utf-8", newline="\n")
                 written += 1
-    # keep the log assets if the API was unreachable, drop anything else that is no longer configured
+    # keep the log and sky assets if the API was unreachable, drop anything else no longer configured
     for stale in ASSET_DIR.glob("*.svg"):
-        if stale.name not in expected and not stale.name.startswith("log-"):
+        if stale.name not in expected and not stale.name.startswith(("log-", "sky-")):
             stale.unlink()
             print(f"removed stale {stale.name}")
     print(f"built {written} changed asset(s) into {ASSET_DIR.relative_to(ROOT)}/")

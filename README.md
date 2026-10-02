@@ -51,10 +51,10 @@ I build software around AI agents and research tooling: a self-hosted paper-disc
 </picture>
 
 <picture>
-<source media="(prefers-color-scheme: dark)" srcset="profile-3d-contrib/profile-dark.svg">
-<img alt="Contribution calendar for the past year, drawn as a 3D map with language and activity breakdowns" src="profile-3d-contrib/profile-light.svg" width="100%">
+<source media="(prefers-color-scheme: dark)" srcset="assets/sky-dark.svg">
+<img alt="Contributions over the past year drawn as a night sky: one star per day, brighter on busier days" src="assets/sky-light.svg" width="100%">
 </picture>
 
 <br>
 
-<sub>Set in Source Serif 4 and Inter. The cards are vectors generated from <a href="profile.toml">profile.toml</a> by <a href="scripts/build.py">scripts/build.py</a>; the contribution map is drawn by <a href="https://github.com/yoshi389111/github-profile-3d-contrib">github-profile-3d-contrib</a>. Everything refreshes daily through GitHub Actions and shows public data only.</sub>
+<sub>Set in Source Serif 4 and Inter. The cards, the glass moon and the night sky are vectors generated from <a href="profile.toml">profile.toml</a> by <a href="scripts/build.py">scripts/build.py</a>; the moon is shaded to the real lunar phase of the day. Everything refreshes daily through GitHub Actions and shows public data only.</sub>
