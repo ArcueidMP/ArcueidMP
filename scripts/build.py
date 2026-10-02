@@ -16,7 +16,9 @@ Live numbers (repository stars, languages, contributions, the year's daily
 contribution counts, recent public commits and merged pull requests) come
 from the GitHub API at build time and are cached in data/live.json so an API
 outage never produces an empty card. Only public data is ever requested. The
-daily counts are drawn as a night sky, one star per day.
+daily counts are drawn as a night sky, one star per day. The 3D contribution
+map below it is not built here; it comes from yoshi389111/github-profile-3d-contrib
+in the same workflow.
 
 Usage:  python scripts/build.py            # edit profile.toml first
 """
