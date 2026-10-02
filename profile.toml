@@ -8,7 +8,7 @@
 [identity]
 name = "ArcueidMP"
 eyebrow = "SOFTWARE ENGINEERING · RESEARCH PORTFOLIO"
-tagline = ["Undergraduate exploring AI agents,", "world models, and embodied intelligence"]
+tagline = ["Undergraduate exploring AI agents,", "world models & embodied AI, and AI infra"]
 # The vermilion seal beside the handle and the line under the tagline, set in
 # Shippori Mincho. After changing the Japanese text, run
 #   python scripts/prepare_fonts.py ShipporiMincho
