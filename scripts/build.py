@@ -8,6 +8,10 @@ per asset and placed with <use>, which keeps the files small. Every asset is
 emitted twice, for GitHub's light and dark colour schemes, and the README
 switches between them with <picture>.
 
+The hero carries a faceted glass moon, shaded to the real phase of the moon on
+the (UTC) build day and turning vermilion on the night of a full moon. Its
+perpetual motion is CSS inside the SVG, so prefers-reduced-motion stills it.
+
 Live numbers (repository stars, languages, contributions, recent public
 commits and merged pull requests) come from the GitHub API at build time and
 are cached in data/live.json so an API outage never produces an empty card.
@@ -20,7 +24,9 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import math
 import os
+import random
 import re
 import shutil
 import subprocess
@@ -44,17 +50,31 @@ PAD = 40         # horizontal gutter
 RIGHT = W - PAD  # right edge for right-aligned text
 LOG_ROWS = 4     # entries shown in the recent-activity ledger
 
-# Colour tokens: warm paper / charcoal with a blue accent, in light and dark.
+# Colour tokens: warm paper / night indigo with a blue accent, in light and dark.
+# Vermilion ("red") is kept for things that are happening now: the moon, the
+# latest activity, active projects. The hero panel runs from bg to bg2; the
+# glass moon is shaded through the four-stop "glass" ramp ("glass_full" on the
+# night of a full moon), with facet edges, rim and cracks drawn in their tokens.
 THEMES = {
     "light": {
-        "bg": "#f6f3ec", "surface": "#fffdf8", "text": "#17191d", "soft": "#33373c",
+        "bg": "#f6f3ec", "bg2": "#f1ece2", "surface": "#fffdf8", "text": "#17191d", "soft": "#33373c",
         "muted": "#5a5d60", "accent": "#244a91", "label": "#244a91",
-        "rule": "#d5cec1", "rule2": "#aaa397",
+        "rule": "#d5cec1", "rule2": "#aaa397", "red": "#c4382c",
+        "card_op": 0.72, "card_stroke": "#d5cec1", "card_stroke_op": 1,
+        "glass": ["#c3cfe6", "#d9e1f0", "#ecf0f8", "#fbfcfe"],
+        "glass_full": ["#ecc9c0", "#f3dad3", "#f9ebe7", "#fffaf8"],
+        "facet": "#244a91", "facet_op": 0.34, "rim": "#244a91", "rim_op": 0.75, "crack": "#244a91",
+        "glow_op": 0.10, "night": False,
     },
     "dark": {
-        "bg": "#16171b", "surface": "#212228", "text": "#eae7e0", "soft": "#c9c6c0",
+        "bg": "#0b1022", "bg2": "#141b31", "surface": "#121a30", "text": "#eae7e0", "soft": "#c9c6c0",
         "muted": "#a09d97", "accent": "#8fb2ee", "label": "#b3cbf5",
-        "rule": "#33343b", "rule2": "#6a6d79",
+        "rule": "#33343b", "rule2": "#6a6d79", "red": "#e5573f",
+        "card_op": 0.62, "card_stroke": "#b3cbf5", "card_stroke_op": 0.28,
+        "glass": ["#1d3768", "#4369ad", "#94b6ef", "#eef4ff"],
+        "glass_full": ["#4a1a1d", "#9c3328", "#e5704f", "#ffe2d8"],
+        "facet": "#d6e4ff", "facet_op": 0.16, "rim": "#cfe0ff", "rim_op": 0.4, "crack": "#eef4ff",
+        "glow_op": 0.34, "night": True,
     },
 }
 
@@ -167,10 +187,18 @@ class Canvas:
         self.f = f
         self.t = t
         self.defs: dict[str, str] = {}
+        self.extra_defs: list[str] = []  # gradients, filters, clip paths
+        self.css: list[str] = []
         self.body: list[str] = []
 
     def add(self, markup: str) -> None:
         self.body.append(markup)
+
+    def define(self, markup: str) -> None:
+        self.extra_defs.append(markup)
+
+    def style(self, css: str) -> None:
+        self.css.append(css)
 
     # -- text ---------------------------------------------------------------
     def text(self, face: Face, text: str, x: float, y: float, size: float, fill: str, *,
@@ -216,20 +244,15 @@ class Canvas:
                 f'dur="{total:.2f}s" begin="0s" fill="freeze" calcMode="spline" '
                 f'keySplines="0 0 1 1;0.2 0.7 0.2 1"/>{markup}</g>')
 
-    @staticmethod
-    def crescent(cx: float, cy: float, r: float, colour: str, bg: str) -> str:
-        """A small waning moon: a disc with a second disc of the background colour biting into it."""
-        return (f'<circle cx="{num(cx)}" cy="{num(cy)}" r="{num(r)}" fill="{colour}"/>'
-                f'<circle cx="{num(cx + r * 0.5)}" cy="{num(cy - r * 0.35)}" r="{num(r * 0.86)}" fill="{bg}"/>')
-
     # -- output -------------------------------------------------------------
     def render(self, height: float, title: str, bg: str | None = None) -> str:
         rect = f'<rect width="{W}" height="{num(height)}" fill="{bg}"/>' if bg else ""
-        defs = "".join(d for d in self.defs.values() if d)
+        defs = "".join(d for d in self.defs.values() if d) + "".join(self.extra_defs)
+        css = f"<style>{''.join(self.css)}</style>" if self.css else ""
         return (
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{num(height)}" '
             f'viewBox="0 0 {W} {num(height)}" role="img" aria-label="{escape(title)}">'
-            f"<title>{escape(title)}</title><defs>{defs}</defs>{rect}{''.join(self.body)}</svg>\n"
+            f"<title>{escape(title)}</title>{css}<defs>{defs}</defs>{rect}{''.join(self.body)}</svg>\n"
         )
 
 
@@ -383,13 +406,266 @@ def pretty_date(iso: str, year: bool = True) -> str:
     return f"{d.day} {d.strftime('%b %Y' if year else '%b')}"
 
 
+# --------------------------------------------------------------------------- the glass moon
+#
+# "A piece of blue glass moon": a faceted glass disc with one shard chipped out
+# and floating beside it, shaded to the real phase of the moon on the build day.
+# The geometry is seeded, so it only changes when the code does.
+
+PHASE_NAMES = [(0, "New moon"), (90, "First quarter"), (180, "Full moon"), (270, "Last quarter")]
+
+
+def moon_phase(day: dt.date) -> dict:
+    """The moon at 12:00 UTC on `day`.
+
+    The phase angle uses the leading terms of Meeus, Astronomical Algorithms
+    eq. 48.4; that is good to about 0.1 degree, i.e. within minutes of the
+    published phase times, which is plenty for a picture.
+    """
+    noon = dt.datetime(day.year, day.month, day.day, 12, tzinfo=dt.timezone.utc)
+    T = (noon - dt.datetime(2000, 1, 1, 12, tzinfo=dt.timezone.utc)).total_seconds() / 86400 / 36525
+    D = 297.8501921 + 445267.1114034 * T   # mean elongation of the moon
+    M = 357.5291092 + 35999.0502909 * T    # sun's mean anomaly
+    Mp = 134.9633964 + 477198.8675055 * T  # moon's mean anomaly
+
+    def s(deg: float) -> float:
+        return math.sin(math.radians(deg))
+
+    i = (180 - D - 6.289 * s(Mp) + 2.100 * s(M) - 1.274 * s(2 * D - Mp)
+         - 0.658 * s(2 * D) - 0.214 * s(2 * Mp) - 0.110 * s(D))
+    elong = (180 - i) % 360  # 0 new, 90 first quarter, 180 full, 270 last quarter
+    # a principal phase is named for about a day either side (the moon moves ~12.2 deg a day)
+    name = next((n for a, n in PHASE_NAMES if min(abs(elong - a), 360 - abs(elong - a)) < 12.2), None)
+    if name is None and elong < 180:
+        name = "Waxing " + ("crescent" if elong < 90 else "gibbous")
+    elif name is None:
+        name = "Waning " + ("gibbous" if elong < 270 else "crescent")
+    return {"lit": (1 - math.cos(math.radians(elong))) / 2, "waning": elong >= 180,
+            "name": name, "full": name == "Full moon"}
+
+
+def delaunay(pts: list[tuple[float, float]]) -> list[tuple[int, int, int]]:
+    """Bowyer-Watson triangulation; plenty fast for the few dozen points of the moon."""
+    n = len(pts)
+    P = pts + [(-1e4, -1e4), (1e4, -1e4), (0.0, 1e4)]
+
+    def circumcircle(t):
+        (ax, ay), (bx, by), (cx, cy) = P[t[0]], P[t[1]], P[t[2]]
+        d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+        a2, b2, c2 = ax * ax + ay * ay, bx * bx + by * by, cx * cx + cy * cy
+        ux = (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d
+        uy = (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d
+        return ux, uy, (ax - ux) ** 2 + (ay - uy) ** 2
+
+    tris = {(n, n + 1, n + 2): circumcircle((n, n + 1, n + 2))}
+    for i, (px, py) in enumerate(pts):
+        bad = [t for t, (ux, uy, r2) in tris.items() if (px - ux) ** 2 + (py - uy) ** 2 < r2]
+        edges: dict[tuple[int, int], int] = {}
+        for t in bad:
+            for e in ((t[0], t[1]), (t[1], t[2]), (t[2], t[0])):
+                key = (min(e), max(e))
+                edges[key] = edges.get(key, 0) + 1
+            del tris[t]
+        for (a, b), count in edges.items():
+            if count == 1:  # the boundary of the cavity
+                tris[(a, b, i)] = circumcircle((a, b, i))
+    return [t for t in tris if max(t) < n]
+
+
+def glass_moon(r: float = 100, seed: int = 7) -> dict:
+    """Facets (in disc-centred coordinates), the chipped shard and the cracks around it."""
+    rnd = random.Random(seed)
+    # Rim points sit outside the disc so the clip path cuts the outer facets; their
+    # radius is jittered because exactly co-circular points make the in-circle test unstable.
+    pts = []
+    for k in range(22):
+        a = 2 * math.pi * k / 22 + rnd.uniform(-0.08, 0.08)
+        rr = r * 1.08 * (1 + rnd.uniform(-0.025, 0.025))
+        pts.append((rr * math.cos(a), rr * math.sin(a)))
+    for _ in range(5000):
+        if len(pts) >= 60:
+            break
+        rr, a = r * 0.97 * math.sqrt(rnd.random()), rnd.uniform(0, 2 * math.pi)
+        p = (rr * math.cos(a), rr * math.sin(a))
+        if all(math.dist(p, q) > 15 for q in pts):
+            pts.append(p)
+
+    facets = []
+    for t in delaunay(pts):
+        poly = [pts[i] for i in t]
+        gx, gy = sum(p[0] for p in poly) / 3, sum(p[1] for p in poly) / 3
+        nx, ny = gx / r, gy / r  # each facet takes the sphere's normal at its centroid
+        facets.append({"poly": poly, "c": (gx, gy), "n": (nx, ny, math.sqrt(max(0.0, 1 - nx * nx - ny * ny))),
+                       "jitter": rnd.uniform(-0.08, 0.08), "inside": all(math.hypot(*p) < r * 0.97 for p in poly)})
+
+    def area(p):
+        return abs((p[1][0] - p[0][0]) * (p[2][1] - p[0][1]) - (p[2][0] - p[0][0]) * (p[1][1] - p[0][1])) / 2
+
+    def sliver(p):  # longest edge squared over area: high for thin, shard-like triangles
+        return max(math.dist(p[i], p[(i + 1) % 3]) for i in range(3)) ** 2 / max(area(p), 1)
+
+    # the shard: the thinnest mid-sized facet near the lit upper-left limb
+    target = (-0.62 * r, -0.56 * r)
+    near = sorted((fc for fc in facets if fc["inside"] and 90 < area(fc["poly"]) < 260),
+                  key=lambda fc: math.dist(fc["c"], target))[:5]
+    shard = max(near, key=lambda fc: sliver(fc["poly"]))
+
+    cracks = []
+    sx, sy = shard["c"]
+    for k, bend in enumerate((0.1, 0.8, -0.5)):  # one crack from each corner of the chip
+        x, y = shard["poly"][k]
+        ang = math.atan2(y - sy, x - sx) * 0.4 + bend
+        path = [(x, y)]
+        for _ in range(rnd.randint(7, 12)):
+            ang += rnd.uniform(-0.45, 0.45)
+            step = rnd.uniform(7, 13)
+            x, y = x + step * math.cos(ang), y + step * math.sin(ang)
+            path.append((x, y))
+        cracks.append(path)
+    return {"r": r, "facets": facets, "shard": shard, "cracks": cracks}
+
+
+def mix(a: str, b: str, k: float) -> str:
+    ca = [int(a[i:i + 2], 16) for i in (1, 3, 5)]
+    cb = [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(x + (y - x) * k):02x}" for x, y in zip(ca, cb))
+
+
+def ramp(stops: list[str], v: float) -> str:
+    v = min(max(v, 0.0), 1.0) * (len(stops) - 1)
+    i = min(int(v), len(stops) - 2)
+    return mix(stops[i], stops[i + 1], v - i)
+
+
+def poly_path(poly, dx: float = 0, dy: float = 0) -> str:
+    return "M" + "L".join(f"{num(x + dx, 1)},{num(y + dy, 1)}" for x, y in poly) + "Z"
+
+
+def shadow_path(cx: float, cy: float, r: float, lit: float, waning: bool) -> str:
+    """The unlit part of the disc: one limb plus the terminator, a half-ellipse of
+    x-radius r*|1-2*lit|. The shadow is on the right of a waning moon."""
+    rx = r * abs(1 - 2 * lit)
+    gibbous = lit > 0.5
+    limb = 1 if waning else 0
+    terminator = (0 if gibbous else 1) if waning else (1 if gibbous else 0)
+    return (f"M{num(cx)},{num(cy - r)}A{num(r)},{num(r)} 0 0 {limb} {num(cx)},{num(cy + r)}"
+            f"A{num(rx)},{num(r)} 0 0 {terminator} {num(cx)},{num(cy - r)}Z")
+
+
+MOON = glass_moon()
+
+# Perpetual motion lives in CSS so prefers-reduced-motion can switch it off;
+# without motion the cracks are simply drawn and the glint is parked off the disc.
+MOON_CSS = (
+    ".glint{transform:translateX(300px)}"
+    "@media (prefers-reduced-motion:no-preference){"
+    ".glow{animation:glow 7s ease-in-out infinite}"
+    ".glint{animation:glint 9s cubic-bezier(.4,0,.2,1) 1.2s infinite both}"
+    ".shard{animation:bob 6s ease-in-out infinite}"
+    ".crack{stroke-dasharray:1;animation:crack 1.4s cubic-bezier(.3,.6,.2,1) both}"
+    ".tw{animation:twinkle 4.5s ease-in-out infinite}"
+    "@keyframes glow{50%{opacity:.7}}"
+    "@keyframes glint{0%{transform:translateX(-260px)}28%,100%{transform:translateX(260px)}}"
+    "@keyframes bob{50%{transform:translate(-2px,-5px)}}"
+    "@keyframes crack{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}"
+    "@keyframes twinkle{50%{opacity:.25}}}"
+)
+
+
+def draw_moon(c: Canvas, cx: float, cy: float, phase: dict) -> str:
+    """Markup for the glow, the shaded glass disc (id "moon", reusable via <use>) and the shard."""
+    t, m = c.t, MOON
+    r = m["r"]
+    stops = t["glass_full"] if phase["full"] else t["glass"]
+    glow = t["red"] if phase["full"] else t["accent"]
+    # ink lines turn vermilion with the paper moon; on the night sky they stay pale
+    red_ink = phase["full"] and not t["night"]
+    facet_ink = t["red"] if red_ink else t["facet"]
+    rim_ink = t["red"] if red_ink else t["rim"]
+    crack_ink = t["red"] if red_ink else t["crack"]
+    # sunlight from above and from the lit side: the right while waxing, the left while waning
+    light = (-0.52 if phase["waning"] else 0.52, -0.6, 0.6)
+    norm = math.hypot(*light)
+
+    def facet_fill(fc: dict) -> str:
+        lambert = max(0.0, sum(a * b for a, b in zip(fc["n"], light)) / norm)
+        return ramp(stops, 0.3 + 0.7 * lambert + fc["jitter"])
+
+    c.style(MOON_CSS)
+    c.define(f'<radialGradient id="glow"><stop offset="0" stop-color="{glow}" stop-opacity="{t["glow_op"]}"/>'
+             f'<stop offset="0.55" stop-color="{glow}" stop-opacity="{num(t["glow_op"] * 0.3)}"/>'
+             f'<stop offset="1" stop-color="{glow}" stop-opacity="0"/></radialGradient>')
+    c.define(f'<linearGradient id="glint" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/>'
+             f'<stop offset="0.5" stop-color="#fff" stop-opacity="{0.38 if t["night"] else 0.7}"/>'
+             f'<stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>')
+    c.define(f'<clipPath id="disc"><circle cx="{num(cx)}" cy="{num(cy)}" r="{num(r)}"/></clipPath>')
+    c.define('<filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>')
+
+    out = [f'<circle class="glow" cx="{num(cx)}" cy="{num(cy)}" r="{num(r * 1.75)}" fill="url(#glow)"/>']
+    body = [f'<path d="{poly_path(fc["poly"], cx, cy)}" fill="{facet_fill(fc)}"/>' for fc in m["facets"]]
+    edges = "".join(f'<path d="{poly_path(fc["poly"], cx, cy)}"/>' for fc in m["facets"])
+    body.append(f'<g fill="none" stroke="{facet_ink}" stroke-opacity="{t["facet_op"]}" stroke-width="0.6" '
+                f'stroke-linejoin="round">{edges}</g>')
+    night_side = shadow_path(cx, cy, r + 2, phase["lit"], phase["waning"])
+    if t["night"]:
+        body.append(f'<path d="{night_side}" fill="{t["bg"]}" fill-opacity="0.62" filter="url(#soft)"/>')
+    else:  # engraved: hatching plus a faint wash
+        c.define(f'<pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+                 f'<rect width="1" height="4" fill="{t["accent"]}" fill-opacity="0.32"/></pattern>')
+        body.append(f'<path d="{night_side}" fill="url(#hatch)" filter="url(#soft)"/>'
+                    f'<path d="{night_side}" fill="{t["accent"]}" fill-opacity="0.07" filter="url(#soft)"/>')
+    body.append(f'<path d="{poly_path(m["shard"]["poly"], cx, cy)}" fill="{t["bg"]}" stroke="{rim_ink}" '
+                f'stroke-opacity="0.5" stroke-width="0.8" stroke-linejoin="round"/>')
+    for k, crack in enumerate(m["cracks"]):
+        d = "M" + "L".join(f"{num(x + cx, 1)},{num(y + cy, 1)}" for x, y in crack)
+        body.append(f'<path class="crack" style="animation-delay:{0.8 + k * 0.25:.2f}s" pathLength="1" d="{d}" '
+                    f'fill="none" stroke="{crack_ink}" stroke-opacity="0.6" stroke-width="0.8" stroke-linecap="round"/>')
+    body.append(f'<g class="glint"><rect x="{num(cx - 30)}" y="{num(cy - r - 40)}" width="60" height="{num(2 * r + 80)}" '
+                f'fill="url(#glint)" transform="rotate(22 {num(cx)} {num(cy)})"/></g>')
+    out.append(f'<g id="moon" clip-path="url(#disc)">{"".join(body)}</g>')
+    out.append(f'<circle cx="{num(cx)}" cy="{num(cy)}" r="{num(r)}" fill="none" stroke="{rim_ink}" '
+               f'stroke-opacity="{t["rim_op"]}"/>')
+
+    # the piece of glass that came away, drifting off the upper-left limb
+    sx, sy = m["shard"]["c"]
+    local = [(x - sx, y - sy) for x, y in m["shard"]["poly"]]
+    out.append(f'<g transform="translate({num(cx + sx - 36)} {num(cy + sy - 40)})"><g class="shard">'
+               f'<path transform="rotate(-14) scale(1.15)" d="{poly_path(local)}" fill="{ramp(stops, 0.95)}" '
+               f'stroke="{rim_ink}" stroke-opacity="0.8" stroke-width="0.8" stroke-linejoin="round"/></g></g>')
+    return "".join(out)
+
+
 # --------------------------------------------------------------------------- assets
 
 
-def build_hero(f: Fonts, t: dict, cfg: dict, live: dict) -> str:
+def build_hero(f: Fonts, t: dict, cfg: dict, live: dict, phase: dict) -> str:
     c = Canvas(f, t)
-    H = 284
+    H = 300
     ident, doss = cfg["identity"], cfg["dossier"]
+    mx, my = 548, 150                  # moon centre, between the tagline and the card
+    cx, cy, cw, ch = 606, 40, 234, 222  # the card, laid over the moon's right limb
+
+    # Sky: a night gradient with stars, or warm paper with a little grain.
+    c.define(f'<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{t["bg"]}"/>'
+             f'<stop offset="1" stop-color="{t["bg2"]}"/></linearGradient>')
+    c.add(f'<rect width="{W}" height="{H}" fill="url(#sky)"/>')
+    if t["night"]:
+        rnd = random.Random(3)
+        stars = []
+        for i in range(70):
+            x, y = rnd.uniform(8, W - 8), rnd.uniform(8, H - 8)
+            size, alpha = rnd.choice((0.6, 0.8, 1.1)), rnd.uniform(0.12, 0.55)
+            dur, delay = rnd.uniform(3, 6), rnd.uniform(0, 3)
+            if math.dist((x, y), (mx, my)) < MOON["r"] * 1.35 or (cx - 6 < x < cx + cw + 6 and cy - 6 < y < cy + ch + 6):
+                continue
+            tw = f' class="tw" style="animation-duration:{dur:.1f}s;animation-delay:{delay:.1f}s"' if i % 9 == 0 else ""
+            stars.append(f'<circle{tw} cx="{num(x, 1)}" cy="{num(y, 1)}" r="{size}" fill="#dfe8ff" opacity="{alpha:.2f}"/>')
+        c.add("".join(stars))
+    else:
+        c.define('<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" '
+                 'stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.35 0 0 0 0 0.3 0 0 0 0 0.22 0 0 0 0.09 0"/></filter>')
+        c.add(f'<rect width="{W}" height="{H}" filter="url(#grain)"/>')
+    c.add(c.fade(draw_moon(c, mx, my, phase), 0.15))
 
     # Left column: accent rule, eyebrow, handle, tagline.
     c.add(c.accent_rule(PAD, 44, t["accent"], animate=True))
@@ -399,15 +675,15 @@ def build_hero(f: Fonts, t: dict, cfg: dict, live: dict) -> str:
     c.add(c.fade("".join(c.text(f.serif_regular, line, PAD, 186 + i * 28, 21, t["soft"])
                          for i, line in enumerate(lines)), 0.34))
 
-    # Right column: a card of public GitHub numbers.
-    cx, cy, cw, ch = 596, 44, 244, 200
-    card = [f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" fill="{t["surface"]}" stroke="{t["rule"]}"/>',
-            # corner bracket
-            f'<path d="M{cx + cw + 8},{cy + 28} V{cy - 8} H{cx + cw - 28}" fill="none" '
-            f'stroke="{t["accent"]}" stroke-width="1.5"/>']
+    # Right column: a frosted-glass card of public GitHub numbers. The moon behind
+    # it is redrawn blurred inside the card's outline, then veiled by the surface.
+    c.define(f'<clipPath id="card"><rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="2"/></clipPath>')
+    c.define('<filter id="frost" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7"/></filter>')
+    card = ['<g clip-path="url(#card)"><g filter="url(#frost)"><use href="#moon"/></g></g>',
+            f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="2" fill="{t["surface"]}" '
+            f'fill-opacity="{t["card_op"]}" stroke="{t["card_stroke"]}" stroke-opacity="{t["card_stroke_op"]}"/>']
     ix, iy = cx + 20, cy + 32
     card.append(c.eyebrow(doss["eyebrow"], ix, iy, t["muted"], size=10))
-    card.append(c.crescent(cx + cw - 30, iy - 4, 7, t["accent"], t["surface"]))
     card.append(c.text(f.serif, doss["title"], ix, iy + 26, 16, t["text"]))
     card.append(c.text(f.sans, doss["detail"], ix, iy + 46, 12, t["muted"]))
     card.append(c.hrule(iy + 60, t["rule"], ix, cx + cw - 20))
@@ -418,15 +694,17 @@ def build_hero(f: Fonts, t: dict, cfg: dict, live: dict) -> str:
             ("Languages", " · ".join(gh.get("languages", [])[:3]) or "—")]
     if contrib.get("total") is not None:
         rows.append(("Past year", f"{contrib['total']:,} contributions"))
+    rows.append(("Moon", f"{phase['name']} · {round(phase['lit'] * 100)}%"))
     rows.append(("Synced", pretty_date(live["changed_at"])))
     ry = iy + 82
     for label, value in rows:
         card.append(c.eyebrow(label, ix, ry, t["muted"], size=9.5))
-        card.append(c.text(f.sans_medium, value, cx + cw - 20, ry, 12.5, t["text"], anchor="end", features=TABULAR))
+        colour = t["red"] if label == "Moon" else t["text"]
+        card.append(c.text(f.sans_medium, value, cx + cw - 20, ry, 12.5, colour, anchor="end", features=TABULAR))
         ry += 22
     c.add(c.fade("".join(card), 0.30))
 
-    return c.render(H, f"{ident['name']} — {' '.join(lines)}", bg=t["bg"])
+    return c.render(H, f"{ident['name']} — {' '.join(lines)}")
 
 
 def build_label(f: Fonts, t: dict, section: dict) -> str:
@@ -533,13 +811,14 @@ def main() -> None:
     cfg = tomllib.loads((ROOT / "profile.toml").read_text(encoding="utf-8"))
     fonts = Fonts()
     live = fetch_live(cfg)
+    phase = moon_phase(dt.datetime.now(dt.timezone.utc).date())
     ASSET_DIR.mkdir(exist_ok=True)
 
     expected: set[str] = set()
     written = 0
     for theme_name, t in THEMES.items():
         files = {
-            f"hero-{theme_name}.svg": build_hero(fonts, t, cfg, live),
+            f"hero-{theme_name}.svg": build_hero(fonts, t, cfg, live, phase),
             f"interests-{theme_name}.svg": build_interests(fonts, t, cfg),
         }
         log = build_log(fonts, t, cfg, live)
