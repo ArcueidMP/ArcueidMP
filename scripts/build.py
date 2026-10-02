@@ -51,8 +51,8 @@ RIGHT = W - PAD  # right edge for right-aligned text
 LOG_ROWS = 4     # entries shown in the recent-activity ledger
 
 # Colour tokens: warm paper / night indigo with a blue accent, in light and dark.
-# Vermilion ("red") is kept for things that are happening now: the moon, the
-# latest activity, active projects. The hero panel runs from bg to bg2; the
+# Vermilion ("red") is kept for things that are happening now: the moon, today
+# in the calendar, active projects. The hero panel runs from bg to bg2; the
 # glass moon is shaded through the four-stop "glass" ramp ("glass_full" on the
 # night of a full moon), with facet edges, rim and cracks drawn in their tokens.
 THEMES = {
@@ -738,9 +738,19 @@ def build_hero(f: Fonts, t: dict, cfg: dict, live: dict, phase: dict) -> str:
     return c.render(H, f"{ident['name']} — {' '.join(lines)}")
 
 
+def shard_glyph(x: float, y: float, colour: str) -> str:
+    """A small two-faceted piece of glass plus a short rule: the mark before each section label.
+    One face is lit and one is in shade, which keeps it reading as glass rather than an arrow."""
+    lit = [(0, 5), (5, 0), (7, 10)]
+    shade = [(5, 0), (12, 3.5), (7, 10)]
+    return (f'<path d="{poly_path(lit, x, y)}" fill="{colour}"/>'
+            f'<path d="{poly_path(shade, x, y)}" fill="{colour}" fill-opacity="0.5"/>'
+            f'<rect x="{num(x + 18)}" y="{num(y + 4.25)}" width="18" height="1.5" fill="{colour}" fill-opacity="0.6"/>')
+
+
 def build_label(f: Fonts, t: dict, section: dict) -> str:
     c = Canvas(f, t)
-    c.add(c.accent_rule(PAD, 16, t["accent"]))
+    c.add(shard_glyph(PAD, 10, t["accent"]))
     c.add(c.eyebrow(section["eyebrow"], PAD, 40, t["label"]))
     # heading sits in the second column, but never closer than 36px to a long eyebrow
     x = max(220, PAD + f.sans_bold.width(section["eyebrow"].upper(), 11.5, 0.13) + 36)
@@ -780,13 +790,18 @@ def build_project(f: Fonts, t: dict, index: int, project: dict, live: dict, last
     c.add(c.text(f.sans_medium, f"{index:02d}", PAD, 38, 11, t["accent"]))
     c.add(c.text(f.serif, project["title"], 90, 40, 20, t["text"]))
 
-    # status pill, top right
+    # status pill, top right; an active project's pill carries a slowly pulsing vermilion dot
     status = project.get("status", "").upper()
     if status:
-        pw = f.sans_bold.width(status, 9.5, 0.13) + 20
+        live_dot = status == "ACTIVE"
+        pw = f.sans_bold.width(status, 9.5, 0.13) + 20 + (12 if live_dot else 0)
         px = RIGHT - pw
         c.add(f'<rect x="{num(px)}" y="24" width="{num(pw)}" height="20" rx="2" fill="none" stroke="{t["rule2"]}"/>')
-        c.add(c.eyebrow(status, px + 10, 38, t["accent"], size=9.5))
+        if live_dot:
+            c.style("@media (prefers-reduced-motion:no-preference){.pulse{animation:pulse 2.4s ease-in-out infinite}"
+                    "@keyframes pulse{50%{opacity:.25}}}")
+            c.add(f'<circle class="pulse" cx="{num(px + 13)}" cy="34" r="3" fill="{t["red"]}"/>')
+        c.add(c.eyebrow(status, px + (22 if live_dot else 10), 38, t["accent"], size=9.5))
 
     # meta line, bottom right: language dot + language · stars · updated
     meta = []
