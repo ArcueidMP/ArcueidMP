@@ -11,7 +11,7 @@
     "ArcueidMP/ArcueidMP": {
       "stars": 1,
       "language": "Python",
-      "pushed_at": "2026-09-30"
+      "pushed_at": "2026-10-01"
     },
     "ArcueidMP/AutoPet": {
       "stars": 4,
@@ -26,7 +26,7 @@
     "ArcueidMP/DisposableResume": {
       "stars": 7,
       "language": "TypeScript",
-      "pushed_at": "2026-09-15"
+      "pushed_at": "2026-10-01"
     },
     "ArcueidMP/Domain-Specific-Paper-Harness": {
       "stars": 3,
@@ -45,7 +45,7 @@
     }
   },
   "contributions": {
-    "total": 213,
+    "total": 216,
     "commits": 100
   },
   "activity": [
@@ -55,13 +55,6 @@
       "kind": "pull request · merged",
       "text": "fix(input): restore a dropped background lease before hidden input",
       "fallback": "Pull request #374 merged"
-    },
-    {
-      "date": "2026-09-26",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "commit",
-      "text": "fix: keep project links in one HTML block so dark variants load",
-      "fallback": "Commit 16a26ef"
     },
     {
       "date": "2026-09-19",
@@ -90,7 +83,14 @@
       "kind": "pull request · merged",
       "text": "feat: render the live preview as the real PDF",
       "fallback": "Pull request #21 merged"
+    },
+    {
+      "date": "2026-09-14",
+      "repo": "ArcueidMP/DisposableResume",
+      "kind": "pull request · merged",
+      "text": "fix: render Chinese text in Classic and Modern ATS PDF exports",
+      "fallback": "Pull request #20 merged"
     }
   ],
-  "changed_at": "2026-10-01"
+  "changed_at": "2026-10-02"
 }
