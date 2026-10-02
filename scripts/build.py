@@ -158,6 +158,10 @@ class Face:
                 current.append(word)
         if current:
             lines.append(" ".join(current))
+        # never end a line on a bare "&": carry it down to the words it joins
+        for i in range(len(lines) - 1):
+            if lines[i].endswith(" &") and self.width("& " + lines[i + 1], size) <= max_width:
+                lines[i], lines[i + 1] = lines[i][:-2], "& " + lines[i + 1]
         return lines
 
     def ellipsize(self, text: str, size: float, max_width: float) -> str:
@@ -766,23 +770,32 @@ def build_label(f: Fonts, t: dict, section: dict) -> str:
 
 
 def build_interests(f: Fonts, t: dict, cfg: dict) -> str:
+    """Interests in equal columns. An interest is a title, or a table with a title and a
+    note set on the line below it; long titles wrap to two lines, and the section grows
+    to the tallest column so the rule and related interests stay clear."""
     c = Canvas(f, t)
-    H = 150
-    items = cfg["research"]["interests"]
+    LINE = 28
+    items = [{"title": it} if isinstance(it, str) else it for it in cfg["research"]["interests"]]
     gap = 24
     col = (W - 2 * PAD - gap * (len(items) - 1)) / len(items)
-    for i, item in enumerate(items):
+    blocks = [(f.serif.wrap(it["title"], 23, col), it.get("note")) for it in items]
+    extra = LINE * (max(len(lines) + bool(note) for lines, note in blocks) - 1)
+    for i, (lines, note) in enumerate(blocks):
         x = PAD + i * (col + gap)
         c.add(c.hrule(8, t["rule2"], x, x + col))
         c.add(c.text(f.sans_medium, f"{i + 1:02d}", x, 34, 11, t["accent"]))
-        c.add(c.text(f.serif, item, x, 66, 23, t["text"]))
-    c.add(c.hrule(96, t["rule"]))
-    c.add(c.eyebrow("Related interests", PAD, 128, t["muted"], size=10))
+        for j, line in enumerate(lines):
+            c.add(c.text(f.serif, line, x, 66 + j * LINE, 23, t["text"]))
+        if note:  # on the baseline of a wrapped title's second line
+            c.add(c.text(f.sans, note, x, 66 + len(lines) * LINE, 13.5, t["soft"]))
+    c.add(c.hrule(96 + extra, t["rule"]))
+    c.add(c.eyebrow("Related interests", PAD, 128 + extra, t["muted"], size=10))
     x = 220
     for item in cfg["research"]["related"]:
-        c.add(c.text(f.serif_regular, item, x, 130, 16, t["soft"]))
+        c.add(c.text(f.serif_regular, item, x, 130 + extra, 16, t["soft"]))
         x += f.serif_regular.width(item, 16) + 32
-    return c.render(H, "Research interests: " + ", ".join(items))
+    names = [it["title"] + (f" ({it['note']})" if it.get("note") else "") for it in items]
+    return c.render(150 + extra, "Research interests: " + ", ".join(names))
 
 
 def build_project(f: Fonts, t: dict, index: int, project: dict, live: dict, last: bool) -> str:
