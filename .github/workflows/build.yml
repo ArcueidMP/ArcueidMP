@@ -9,7 +9,6 @@ on:
     paths:
       - profile.toml
       - scripts/**
-      - .github/profile-3d.json
       - .github/workflows/build.yml
 
 permissions:
@@ -31,23 +30,16 @@ jobs:
           cache: pip
           cache-dependency-path: scripts/requirements.txt
 
-      - name: Build typographic cards
+      - name: Build cards, moon and night sky
         run: |
           pip install -r scripts/requirements.txt
           python scripts/build.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Draw the 3D contribution map
-        uses: yoshi389111/github-profile-3d-contrib@v0.9.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.repository_owner }}
-          SETTING_JSON: .github/profile-3d.json
-
       - name: Commit refreshed assets
         run: |
-          git add -A assets data profile-3d-contrib
+          git add -A assets data
           if git diff --cached --quiet; then
             echo "Assets already up to date."
             exit 0

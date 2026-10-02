@@ -48,7 +48,7 @@ status = "PROTOTYPE"
 
 # ---------------------------------------------------------------------------
 # Section labels (number / eyebrow / heading). 03 is the recent-activity
-# ledger and 04 the 3D contribution map; both are filled automatically.
+# ledger and 04 the night-sky contribution calendar; both are filled automatically.
 [[sections]]
 id = "research"
 eyebrow = "01 / RESEARCH"
