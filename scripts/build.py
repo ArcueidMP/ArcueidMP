@@ -3,7 +3,7 @@
 
 GitHub READMEs allow no CSS and no web fonts, so every piece of text here is
 shaped with HarfBuzz and written out as vector outlines in Source Serif 4 and
-Inter. Each glyph outline is defined once
+Inter, with Shippori Mincho for the Japanese seal and epigraph. Each glyph outline is defined once
 per asset and placed with <use>, which keeps the files small. Every asset is
 emitted twice, for GitHub's light and dark colour schemes, and the README
 switches between them with <picture>.
@@ -178,6 +178,8 @@ class Fonts:
         self.sans = Face("i", FONT_DIR / "Inter-Regular.ttf")
         self.sans_medium = Face("m", FONT_DIR / "Inter-Medium.ttf")
         self.sans_bold = Face("b", FONT_DIR / "Inter-Bold.ttf")               # wght 720, the eyebrow weight
+        self.mincho = Face("j", FONT_DIR / "ShipporiMincho-Medium.ttf")       # subset to profile.toml's Japanese
+        self.mincho_bold = Face("k", FONT_DIR / "ShipporiMincho-ExtraBold.ttf")
 
 
 class Canvas:
@@ -690,6 +692,20 @@ def build_hero(f: Fonts, t: dict, cfg: dict, live: dict, phase: dict) -> str:
     c.add(c.fade("".join(c.text(f.serif_regular, line, PAD, 186 + i * 28, 21, t["soft"])
                          for i, line in enumerate(lines)), 0.34))
 
+    # A vermilion seal pressed beside the handle, its edge roughened like a stamp.
+    ink = t["bg"] if t["night"] else "#fff8f0"
+    sx = PAD - 2 + f.display.width(ident["name"], 62) + 22
+    c.define('<filter id="stamp" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" '
+             'baseFrequency="0.9" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="1.8"/></filter>')
+    c.add(c.fade(f'<g transform="translate({num(sx)} 104) rotate(-5)" filter="url(#stamp)">'
+                 f'<rect width="32" height="32" rx="3" fill="{t["red"]}" fill-opacity="0.92"/>'
+                 f'<rect x="3" y="3" width="26" height="26" rx="1.5" fill="none" stroke="{ink}" stroke-opacity="0.85"/>'
+                 f'{c.text(f.mincho_bold, ident["seal"], 16, 23.6, 20, ink, anchor="middle")}</g>', 0.5))
+    # The epigraph: Japanese in Mincho, its English gloss in the serif.
+    ja = c.text(f.mincho, ident["epigraph_ja"], PAD, 258, 13, t["muted"], tracking=0.2, features={"palt": True})
+    gx = PAD + f.mincho.width(ident["epigraph_ja"], 13, 0.2, {"palt": True}) + 12
+    c.add(c.fade(ja + c.text(f.serif_regular, ident["epigraph_en"], gx, 258, 13.5, t["muted"]), 0.6))
+
     # Right column: a frosted-glass card of public GitHub numbers. The moon behind
     # it is redrawn blurred inside the card's outline, then veiled by the surface.
     c.define(f'<clipPath id="card"><rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="2"/></clipPath>')
@@ -919,6 +935,9 @@ def build_sky(f: Fonts, t: dict, live: dict) -> str | None:
 def main() -> None:
     cfg = tomllib.loads((ROOT / "profile.toml").read_text(encoding="utf-8"))
     fonts = Fonts()
+    japanese = cfg["identity"]["seal"] + cfg["identity"]["epigraph_ja"]
+    if not (fonts.mincho.supports(japanese) and fonts.mincho_bold.supports(japanese)):
+        sys.exit("profile.toml has Japanese the Mincho subset lacks; run: python scripts/prepare_fonts.py ShipporiMincho")
     live = fetch_live(cfg)
     phase = moon_phase(dt.datetime.now(dt.timezone.utc).date())
     ASSET_DIR.mkdir(exist_ok=True)

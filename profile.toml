@@ -9,6 +9,13 @@
 name = "ArcueidMP"
 eyebrow = "SOFTWARE ENGINEERING · RESEARCH PORTFOLIO"
 tagline = ["Undergraduate exploring AI agents,", "world models, and embodied intelligence"]
+# The vermilion seal beside the handle and the line under the tagline, set in
+# Shippori Mincho. After changing the Japanese text, run
+#   python scripts/prepare_fonts.py ShipporiMincho
+# so the font subset covers the new characters.
+seal = "月"
+epigraph_ja = "月の欠片"
+epigraph_en = "— a piece of the moon, kept on GitHub"
 
 # The card on the right of the hero. Its numbers are filled from the GitHub API.
 [dossier]

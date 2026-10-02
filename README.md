@@ -57,4 +57,4 @@ I build software around AI agents and research tooling: a self-hosted paper-disc
 
 <br>
 
-<sub>Set in Source Serif 4 and Inter. The cards, the glass moon and the night sky are vectors generated from <a href="profile.toml">profile.toml</a> by <a href="scripts/build.py">scripts/build.py</a>; the moon is shaded to the real lunar phase of the day. Everything refreshes daily through GitHub Actions and shows public data only.</sub>
+<sub>Set in Source Serif 4, Inter and Shippori Mincho. The cards, the glass moon and the night sky are vectors generated from <a href="profile.toml">profile.toml</a> by <a href="scripts/build.py">scripts/build.py</a>; the moon is shaded to the real lunar phase of the day. Everything refreshes daily through GitHub Actions and shows public data only.</sub>
