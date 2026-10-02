@@ -4,14 +4,20 @@
 Downloads the variable fonts (Source Serif 4 and Inter, both SIL OFL) from the
 google/fonts repository, instantiates them at the weights and optical sizes the
 cards use, and subsets them to the Latin glyphs the README
-needs. The resulting files are committed under scripts/fonts/ so the daily
-GitHub Action never has to touch the network for fonts.
+needs. Shippori Mincho (also SIL OFL) is static; it is subset to exactly the
+Japanese characters profile.toml uses for the seal and the epigraph. The
+resulting files are committed under scripts/fonts/ so the daily GitHub Action
+never has to touch the network for fonts.
 
 Run only when the font set needs to change:  python scripts/prepare_fonts.py
+Name families to rebuild just those, e.g. after editing the seal or epigraph:
+    python scripts/prepare_fonts.py ShipporiMincho
 """
 from __future__ import annotations
 
 import io
+import sys
+import tomllib
 import urllib.request
 from pathlib import Path
 
@@ -19,15 +25,19 @@ from fontTools import subset
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 
-FONT_DIR = Path(__file__).resolve().parent / "fonts"
+ROOT = Path(__file__).resolve().parent.parent
+FONT_DIR = ROOT / "scripts" / "fonts"
 
 SOURCES = {
     "SourceSerif4": "https://github.com/google/fonts/raw/main/ofl/sourceserif4/SourceSerif4%5Bopsz%2Cwght%5D.ttf",
     "Inter": "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf",
+    "ShipporiMincho-Medium": "https://github.com/google/fonts/raw/main/ofl/shipporimincho/ShipporiMincho-Medium.ttf",
+    "ShipporiMincho-ExtraBold": "https://github.com/google/fonts/raw/main/ofl/shipporimincho/ShipporiMincho-ExtraBold.ttf",
 }
 
-# (output name, source family, axis location): headings use Source Serif 4 at
-# wght 540, eyebrows use Inter at wght 720.
+# (output name, source, axis location or None for a static font): headings use
+# Source Serif 4 at wght 540, eyebrows use Inter at wght 720; the epigraph is
+# Shippori Mincho Medium and the seal ExtraBold.
 INSTANCES = [
     ("SourceSerif4-Display", "SourceSerif4", {"wght": 540, "opsz": 60}),
     ("SourceSerif4-Text", "SourceSerif4", {"wght": 540, "opsz": 20}),
@@ -35,6 +45,8 @@ INSTANCES = [
     ("Inter-Regular", "Inter", {"wght": 400, "opsz": 14}),
     ("Inter-Medium", "Inter", {"wght": 500, "opsz": 14}),
     ("Inter-Bold", "Inter", {"wght": 720, "opsz": 14}),
+    ("ShipporiMincho-Medium", "ShipporiMincho-Medium", None),
+    ("ShipporiMincho-ExtraBold", "ShipporiMincho-ExtraBold", None),
 ]
 
 # Basic Latin, Latin-1 Supplement, general punctuation, plus the arrow used for
@@ -47,6 +59,12 @@ UNICODES = (
 )
 
 
+def japanese_text() -> list[int]:
+    """Code points of the seal and the epigraph in profile.toml, plus a space."""
+    ident = tomllib.loads((ROOT / "profile.toml").read_text(encoding="utf-8"))["identity"]
+    return sorted({0x20, *map(ord, ident["seal"] + ident["epigraph_ja"])})
+
+
 def download(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": "ArcueidMP-profile-fonts"})
     with urllib.request.urlopen(req, timeout=60) as resp:
@@ -55,31 +73,36 @@ def download(url: str) -> bytes:
 
 def main() -> None:
     FONT_DIR.mkdir(parents=True, exist_ok=True)
-    variable: dict[str, bytes] = {}
-    for family, url in SOURCES.items():
+    wanted = sys.argv[1:]
+    instances = [i for i in INSTANCES if not wanted or any(i[1].startswith(w) for w in wanted)]
+    if not instances:
+        sys.exit(f"no font family matches {' '.join(wanted)}; known: {', '.join(SOURCES)}")
+    sources: dict[str, bytes] = {}
+    for family in dict.fromkeys(source for _, source, _ in instances):
         print(f"downloading {family} ...")
-        variable[family] = download(url)
+        sources[family] = download(SOURCES[family])
 
     options = subset.Options()
-    options.layout_features = ["kern", "liga", "calt", "mark", "mkmk"]
+    options.layout_features = ["kern", "liga", "calt", "mark", "mkmk", "palt"]  # palt: proportional kana
     options.name_IDs = ["*"]
     options.notdef_outline = True
     options.recalc_bounds = True
     options.drop_tables += ["DSIG"]
 
-    for name, family, location in INSTANCES:
-        font = TTFont(io.BytesIO(variable[family]))
-        static = instancer.instantiateVariableFont(font, location, inplace=False)
+    for name, family, location in instances:
+        font = TTFont(io.BytesIO(sources[family]))
+        static = instancer.instantiateVariableFont(font, location, inplace=False) if location else font
         subsetter = subset.Subsetter(options)
-        subsetter.populate(unicodes=UNICODES)
+        subsetter.populate(unicodes=UNICODES if location else japanese_text())
         subsetter.subset(static)
         out = FONT_DIR / f"{name}.ttf"
         static.save(out)
         print(f"  {out.name:32s} {out.stat().st_size / 1024:6.1f} KB  {location}")
 
     (FONT_DIR / "LICENSE.md").write_text(
-        "Source Serif 4 (c) Adobe Systems Incorporated and Inter (c) The Inter Project Authors.\n"
-        "Both fonts are licensed under the SIL Open Font License 1.1 and are redistributed here\n"
+        "Source Serif 4 (c) Adobe Systems Incorporated, Inter (c) The Inter Project Authors and\n"
+        "Shippori Mincho (c) 2021 The Shippori Mincho Project Authors (https://github.com/fontdasu/ShipporiMincho).\n"
+        "All three are licensed under the SIL Open Font License 1.1 and are redistributed here\n"
         "as static, subsetted instances generated by scripts/prepare_fonts.py.\n"
         "https://openfontlicense.org/\n",
         encoding="utf-8",
