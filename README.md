@@ -55,6 +55,16 @@ I build software around AI agents and research tooling: a self-hosted paper-disc
 <img alt="Contributions over the past year drawn as a night sky: one star per day, brighter on busier days" src="assets/sky-light.svg" width="100%">
 </picture>
 
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="assets/label-relief-dark.svg">
+<img alt="05 / Relief — The same year, in three dimensions" src="assets/label-relief-light.svg" width="100%">
+</picture>
+
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="profile-3d-contrib/profile-dark.svg">
+<img alt="Contribution calendar for the past year, drawn as a 3D map with language and activity breakdowns" src="profile-3d-contrib/profile-light.svg" width="100%">
+</picture>
+
 <br>
 
-<sub>Set in Source Serif 4, Inter and Shippori Mincho. The cards, the glass moon and the night sky are vectors generated from <a href="profile.toml">profile.toml</a> by <a href="scripts/build.py">scripts/build.py</a>; the moon is shaded to the real lunar phase of the day. Everything refreshes daily through GitHub Actions and shows public data only.</sub>
+<sub>Set in Source Serif 4, Inter and Shippori Mincho. The cards, the glass moon and the night sky are vectors generated from <a href="profile.toml">profile.toml</a> by <a href="scripts/build.py">scripts/build.py</a>; the moon is shaded to the real lunar phase of the day. The 3D map is drawn by <a href="https://github.com/yoshi389111/github-profile-3d-contrib">github-profile-3d-contrib</a>. Everything refreshes daily through GitHub Actions and shows public data only.</sub>
