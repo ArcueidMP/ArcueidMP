@@ -54,7 +54,8 @@ LOG_ROWS = 4     # entries shown in the recent-activity ledger
 
 # Colour tokens: warm paper / night indigo with a blue accent, in light and dark.
 # Vermilion ("red") is kept for things that are happening now: the moon, today
-# in the calendar, active projects. The hero panel runs from bg to bg2; the
+# in the calendar, active projects; the seal beside the handle is the one
+# fixed exception. The hero panel runs from bg to bg2; the
 # glass moon is shaded through the four-stop "glass" ramp ("glass_full" on the
 # night of a full moon), with facet edges, rim and cracks drawn in their tokens.
 THEMES = {
@@ -413,7 +414,7 @@ def fetch_live(cfg: dict) -> dict:
         return json.dumps({k: d.get(k) for k in ("github_user", "repos", "contributions", "activity")},
                           sort_keys=True)
 
-    today = dt.date.today().isoformat()
+    today = utc_today().isoformat()
     live["changed_at"] = prev.get("changed_at", today) if core(live) == core(prev) else today
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(live, indent=2, ensure_ascii=False)
@@ -422,6 +423,12 @@ def fetch_live(cfg: dict) -> dict:
                   lambda m: "[" + ", ".join(n.strip() for n in m.group(1).split(",")) + "]", text)
     DATA_FILE.write_text(text + "\n", encoding="utf-8")
     return live
+
+
+def utc_today() -> dt.date:
+    """The build day. Everything dated (the moon, "synced") uses UTC, as the workflow does,
+    so a local build agrees with CI."""
+    return dt.datetime.now(dt.timezone.utc).date()
 
 
 def pretty_date(iso: str, year: bool = True) -> str:
@@ -974,7 +981,7 @@ def main() -> None:
     if not (fonts.mincho.supports(japanese) and fonts.mincho_bold.supports(japanese)):
         sys.exit("profile.toml has Japanese the Mincho subset lacks; run: python scripts/prepare_fonts.py ShipporiMincho")
     live = fetch_live(cfg)
-    phase = moon_phase(dt.datetime.now(dt.timezone.utc).date())
+    phase = moon_phase(utc_today())
     ASSET_DIR.mkdir(exist_ok=True)
 
     expected: set[str] = set()

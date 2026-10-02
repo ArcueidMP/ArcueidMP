@@ -3,7 +3,7 @@
 <img alt="ArcueidMP — Undergraduate exploring AI agents, world models and embodied AI, and AI infra" src="assets/hero-light.svg" width="100%">
 </picture>
 
-I build software around AI agents and research tooling: a self-hosted paper-discovery pipeline, a browser-only résumé builder, and a small desktop-pet prototype. I am looking for undergraduate research opportunities in agents, world models, and embodied intelligence.
+I build software around AI agents and research tooling: a browser-only résumé builder, a self-hosted paper-discovery pipeline, and a small desktop-pet prototype. I am looking for undergraduate research opportunities in AI agents and RL, world models and embodied AI, and AI infra.
 
 <picture>
 <source media="(prefers-color-scheme: dark)" srcset="assets/label-research-dark.svg">
