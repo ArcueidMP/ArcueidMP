@@ -1,17 +1,17 @@
 {
   "github_user": {
-    "public_repos": 4,
+    "public_repos": 5,
     "stars": 15,
     "languages": [
-      "Python",
-      "TypeScript"
+      "TypeScript",
+      "Python"
     ]
   },
   "repos": {
     "ArcueidMP/ArcueidMP": {
       "stars": 1,
       "language": "Python",
-      "pushed_at": "2026-10-23"
+      "pushed_at": "2026-10-24"
     },
     "ArcueidMP/AstrBot": {
       "stars": 0,
@@ -46,7 +46,7 @@
     "ArcueidMP/Octop": {
       "stars": 0,
       "language": null,
-      "pushed_at": "2026-10-21"
+      "pushed_at": "2026-10-25"
     },
     "ArcueidMP/openclaw": {
       "stars": 1,
@@ -58,6 +58,11 @@
       "language": null,
       "pushed_at": "2026-10-09"
     },
+    "ArcueidMP/skilltide": {
+      "stars": 0,
+      "language": "TypeScript",
+      "pushed_at": "2026-10-24"
+    },
     "ArcueidMP/TencentDB-Agent-Memory": {
       "stars": 0,
       "language": null,
@@ -66,60 +71,60 @@
     "ArcueidMP/vincair-multi-agent-wm": {
       "stars": 0,
       "language": "Python",
-      "pushed_at": "2026-10-24"
+      "pushed_at": "2026-10-25"
     }
   },
   "contributions": {
-    "total": 338,
-    "commits": 118
+    "total": 343,
+    "commits": 161
   },
   "activity": [
     {
-      "date": "2026-10-21",
-      "repo": "Tencent/BrowserSkill",
-      "kind": "pull request · merged",
-      "text": "fix(cli): report argument errors through the --json contract",
-      "fallback": "Pull request #411 merged"
+      "date": "2026-10-24",
+      "repo": "ArcueidMP/skilltide",
+      "kind": "commit",
+      "text": "Date the technology declaration 25 October 2026",
+      "fallback": "Commit 78dea89"
     },
     {
-      "date": "2026-10-08",
-      "repo": "openclaw/openclaw",
-      "kind": "pull request · merged",
-      "text": "fix(workboard): stop re-dispatch from silently using an old base",
-      "fallback": "Pull request #164829 merged"
+      "date": "2026-10-24",
+      "repo": "ArcueidMP/skilltide",
+      "kind": "commit",
+      "text": "Update outdated docs and declare Canva in the technology declaration",
+      "fallback": "Commit 200a5ab"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "pull request · merged",
-      "text": "Align the intro with the new interests and date everything in UTC",
-      "fallback": "Pull request #3 merged"
+      "date": "2026-10-24",
+      "repo": "ArcueidMP/skilltide",
+      "kind": "commit",
+      "text": "Link the demo and pitch video",
+      "fallback": "Commit f8ddd91"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "pull request · merged",
-      "text": "Fix activity log dedup and regroup research interests",
-      "fallback": "Pull request #2 merged"
+      "date": "2026-10-24",
+      "repo": "ArcueidMP/skilltide",
+      "kind": "commit",
+      "text": "Complete the README for submission",
+      "fallback": "Commit 053e239"
     },
     {
-      "date": "2026-10-02",
-      "repo": "ArcueidMP/ArcueidMP",
-      "kind": "pull request · merged",
-      "text": "Glass moon redesign: moon-phase hero, night-sky calendar, and two fixes",
-      "fallback": "Pull request #1 merged"
+      "date": "2026-10-24",
+      "repo": "ArcueidMP/skilltide",
+      "kind": "commit",
+      "text": "Add the technology declaration and the pitch deck",
+      "fallback": "Commit 000c8a4"
     },
     {
-      "date": "2026-09-30",
-      "repo": "Tencent/BrowserSkill",
-      "kind": "pull request · merged",
-      "text": "fix(input): restore a dropped background lease before hidden input",
-      "fallback": "Pull request #374 merged"
+      "date": "2026-10-24",
+      "repo": "ArcueidMP/skilltide",
+      "kind": "commit",
+      "text": "Correct the demo film's outdated claims and update its plan",
+      "fallback": "Commit 7aebef2"
     }
   ],
   "calendar": {
-    "start": "2025-10-19",
-    "counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10, 3, 0, 7, 5, 3, 15, 6, 3, 0, 9, 0, 0, 5, 15, 0, 0, 3, 0, 10, 6, 0, 0, 1, 2, 6, 0, 3, 0, 0, 0, 7, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 0, 0, 0, 4, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 2, 4, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 3, 0, 0, 0, 3, 3, 0, 2, 3, 2, 0, 0, 0, 0, 0, 0, 4, 0, 0, 1, 5, 1, 5, 13, 4, 0, 2, 1, 3, 1, 6, 1, 5, 16, 4, 1, 0, 0, 1, 8, 5, 9, 27, 9, 4]
+    "start": "2025-10-26",
+    "counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10, 3, 0, 7, 5, 3, 15, 6, 3, 0, 9, 0, 0, 5, 15, 0, 0, 3, 0, 10, 6, 0, 0, 1, 2, 6, 0, 3, 0, 0, 0, 7, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 5, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 0, 0, 0, 4, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 2, 4, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 3, 0, 0, 0, 3, 3, 0, 2, 3, 2, 0, 0, 0, 0, 0, 0, 4, 0, 0, 1, 5, 1, 5, 13, 4, 0, 2, 1, 3, 1, 6, 1, 5, 16, 4, 1, 0, 0, 1, 8, 5, 9, 27, 9, 4, 5]
   },
-  "changed_at": "2026-10-24"
+  "changed_at": "2026-10-25"
 }
